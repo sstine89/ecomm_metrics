@@ -1,0 +1,44 @@
+WITH cte_emp_projects AS (
+  SELECT
+    e.emp_id,
+    e.name,
+    e.department,
+    p.product_id,
+    pr.product_name,
+    p.store_id,
+    s.store_name,
+    p.ecommerce_id,
+    ec.platform,
+    p.revenue,
+    DATEDIFF(p.end_date, p.start_date) AS project_duration_days,
+    ROW_NUMBER() OVER (PARTITION BY e.emp_id ORDER BY p.start_date DESC) AS proj_rank,
+    COUNT(*) OVER (PARTITION BY e.emp_id) AS total_projects
+  FROM employees e
+  JOIN projects p
+    ON e.emp_id = p.emp_id
+  LEFT JOIN products pr
+    ON p.product_id = pr.product_id
+  LEFT JOIN stores s
+    ON p.store_id = s.store_id
+  LEFT JOIN ecommerce ec
+    ON p.ecommerce_id = ec.ecom_id
+)
+SELECT
+  emp_id,
+  name,
+  department,
+  COUNT(*) AS num_projects,
+  SUM(revenue) AS total_revenue,
+  AVG(revenue) AS avg_revenue,
+  AVG(project_duration_days) AS avg_duration_days,
+  MAX(revenue) AS top_project_revenue,
+  MIN(project_duration_days) AS shortest_project,
+  MAX(project_duration_days) AS longest_project,
+  SUM(CASE WHEN platform = 'Web' THEN revenue ELSE 0 END) AS web_revenue,
+  SUM(CASE WHEN platform = 'Mobile' THEN revenue ELSE 0 END) AS mobile_revenue,
+  total_projects
+FROM cte_emp_projects
+WHERE proj_rank = 1  -- latest project per employee
+GROUP BY emp_id, name, department, total_projects
+ORDER BY total_revenue DESC
+LIMIT 50;
