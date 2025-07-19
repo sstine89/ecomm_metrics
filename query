@@ -1,3 +1,4 @@
+--Testing ClickUp Integration
 WITH cte_emp_projects AS (
   SELECT
     e.emp_id,
