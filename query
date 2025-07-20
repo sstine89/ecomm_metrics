@@ -4,12 +4,12 @@ WITH cte_emp_projects AS (
     e.emp_id,
     e.name,
     e.department,
-    p.product_id,
+ 
     pr.product_name,
     p.store_id,
     s.store_name,
     p.ecommerce_id,
-    ec.platform,
+   
     p.revenue,
     DATEDIFF(p.end_date, p.start_date) AS project_duration_days,
     ROW_NUMBER() OVER (PARTITION BY e.emp_id ORDER BY p.start_date DESC) AS proj_rank,
